@@ -48,19 +48,30 @@ def display_today_transactions():
     from datetime import date
     today = date.today().strftime('%Y-%m-%d')
     connection = connect_to_database()
-    cursor = connection.cursor()
-    
-    query = """
-    SELECT * FROM borrow_transactions
-    WHERE borrow_date = %s 
-    """
-    cursor.execute(query, (today,))
-    transactions = cursor.fetchall()
-    
-    print("Today's Transactions (Borrowed or Returned):")
-    for transaction in transactions:
-        print(transaction)
-    
-    cursor.close()
-    connection.close()
+    transactions_list = []
+    try:
+        cursor = connection.cursor()
+        query = """
+        SELECT id, member_id, book_id, borrow_date, status
+        FROM borrow_transactions
+        WHERE borrow_date = %s AND (status = 'Borrowed' OR status = 'Returned')
+        """
+        cursor.execute(query, (today,))
+        transactions = cursor.fetchall()
+        
+        for transaction in transactions:
+            transactions_list.append({
+                "id": transaction[0],
+                "member_id": transaction[1],
+                "book_id": transaction[2],
+                "borrow_date": transaction[3].strftime('%Y-%m-%d'),
+                "status": transaction[4]
+            })
+    except Exception as e:
+        print(f"Error displaying today's transactions: {e}")
+    finally:
+        cursor.close()
+        connection.close()
+    return transactions_list
+
 
