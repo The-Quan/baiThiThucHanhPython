@@ -49,11 +49,18 @@ def display_today_transactions():
     today = date.today().strftime('%Y-%m-%d')
     connection = connect_to_database()
     cursor = connection.cursor()
-    query = "SELECT * FROM borrow_transactions WHERE borrow_date = %s"
+    
+    query = """
+    SELECT * FROM borrow_transactions
+    WHERE borrow_date = %s 
+    """
     cursor.execute(query, (today,))
     transactions = cursor.fetchall()
-    print("Today's Transactions:")
+    
+    print("Today's Transactions (Borrowed or Returned):")
     for transaction in transactions:
         print(transaction)
+    
     cursor.close()
     connection.close()
+
